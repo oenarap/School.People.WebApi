@@ -1,16 +1,16 @@
 ﻿using System;
-using SchoolPeople;
-using SchoolPeople.DTOs;
+using School.People.Core;
+using School.People.Core.DTOs;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using SchoolPeople.Core.Queries;
-using SchoolPeople.Core.Commands;
+using School.People.App.Queries;
+using School.People.App.Commands;
 using System.Collections.Generic;
-using Apps.Communication.Abstracts;
-using SchoolPeople.Core.QueryResults;
-using SchoolPeople.Core.QueryHandlers;
+using Apps.Communication.Core;
+using School.People.App.QueryResults;
+using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
-using SchoolPeople.Core.Commands.Handlers;
+using School.People.App.Commands.Handlers;
 
 namespace School.People.WebApi.Controllers
 {

@@ -1,11 +1,11 @@
 ﻿using System;
-using SchoolPeople.DTOs;
+using School.People.Core.DTOs;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using SchoolPeople.Core.Commands;
-using Apps.Communication.Abstracts;
+using School.People.App.Commands;
+using Apps.Communication.Core;
 using Microsoft.AspNetCore.Authorization;
-using SchoolPeople.Core.Commands.Handlers;
+using School.People.App.Commands.Handlers;
 
 namespace School.People.WebApi.Controllers
 {

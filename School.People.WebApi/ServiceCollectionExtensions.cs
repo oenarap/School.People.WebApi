@@ -1,18 +1,18 @@
 ﻿using System.Text;
-using SchoolPeople.Data;
-using SchoolPeople.Core.Hubs;
-using SchoolPeople.Repositories;
+using School.People.Data;
+using School.People.App.Hubs;
+using School.People.Core.Repositories;
 using School.People.WebApi.Data;
-using Apps.Communication.Abstracts;
+using Apps.Communication.Core;
 using Microsoft.EntityFrameworkCore;
-using SchoolPeople.Data.Repositories;
+using School.People.Data.Repositories;
 using Microsoft.IdentityModel.Tokens;
-using SchoolPeople.Core.QueryHandlers;
-using SchoolPeople.Core.Queries.Handlers;
+using School.People.App.QueryHandlers;
+using School.People.App.Queries.Handlers;
 using Microsoft.Extensions.Configuration;
-using SchoolPeople.Core.Commands.Handlers;
+using School.People.App.Commands.Handlers;
 using Microsoft.Extensions.DependencyInjection;
-using SchoolPeople.Core.Queries.Results.Handlers;
+using School.People.App.Queries.Results.Handlers;
 
 namespace School.People.WebApi
 {

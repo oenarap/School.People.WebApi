@@ -1,12 +1,12 @@
 ﻿using System;
-using SchoolPeople;
+using School.People.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using SchoolPeople.Core.Queries;
+using School.People.App.Queries;
 using System.Collections.Generic;
-using Apps.Communication.Abstracts;
-using SchoolPeople.Core.QueryResults;
-using SchoolPeople.Core.QueryHandlers;
+using Apps.Communication.Core;
+using School.People.App.QueryResults;
+using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
 
 namespace School.People.WebApi.Controllers
