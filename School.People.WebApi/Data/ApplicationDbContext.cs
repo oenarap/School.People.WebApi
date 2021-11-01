@@ -11,7 +11,7 @@ namespace School.People.WebApi.Data
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer(@"Data Source=DRACO-BACHTIN\SQLEXPRESS;Initial Catalog=School.People.UsersDb;Integrated Security=True");
+            optionsBuilder.UseSqlServer(@"Data Source=SURFACE-RMD10\SQLEXPRESS;Initial Catalog=School.People.UsersDb;Integrated Security=True");
         }
     }
 }

@@ -13,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using School.People.App.Commands.Handlers;
 using Microsoft.Extensions.DependencyInjection;
 using School.People.App.Queries.Results.Handlers;
+using School.People.WebApi.Services;
 
 namespace School.People.WebApi
 {
@@ -30,13 +31,19 @@ namespace School.People.WebApi
                     jwtBearerOptions.TokenValidationParameters = new TokenValidationParameters
                     {
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF32.GetBytes(configuration.GetValue<string>("userTokey"))),
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF32.GetBytes(configuration["Keys:TokenKey"])),
                         ValidateIssuer = false,
                         ValidateAudience = false,
                         ValidateLifetime = true,
                         ClockSkew = System.TimeSpan.FromMinutes(5)
                     };
                 });
+            return services;
+        }
+
+        public static IServiceCollection AddServiceEntities(this IServiceCollection services)
+        {
+            services.AddScoped<UserService>();
             return services;
         }
 

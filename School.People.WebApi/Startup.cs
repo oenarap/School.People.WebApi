@@ -27,6 +27,7 @@ namespace School.People.WebApi
             services.AddAppDbContext(Configuration);
             services.AddJwtAuthentication(Configuration);
             services.RegisterDbEntities(Configuration);
+            services.AddServiceEntities();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
