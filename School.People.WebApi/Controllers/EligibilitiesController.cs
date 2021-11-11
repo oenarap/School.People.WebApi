@@ -7,10 +7,9 @@ using School.People.App.Queries;
 using System.Collections.Generic;
 using School.People.App.Commands;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
 using School.People.App.Commands.Handlers;
+using School.People.App.Queries.Results;
 
 namespace School.People.WebApi.Controllers
 {
@@ -19,46 +18,51 @@ namespace School.People.WebApi.Controllers
     public class EligibilitiesController : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IEnumerable<IEligibility>> Get(Guid id)
+        public async Task<IEnumerable<IEligibility>> Get([FromRoute]Guid id, [FromQuery]Guid personId)
         {
-            var result = await QueryHub.Dispatch<EligibilitiesQuery, EligibilitiesQueryResult>(new EligibilitiesQuery(this.Id, id)).ConfigureAwait(false);
+            var result = await queryHub.Dispatch<EligibilitiesQuery, 
+                EligibilitiesQueryResult>(new EligibilitiesQuery(id, personId)).ConfigureAwait(false);
             return result?.Data;
         }
 
         [HttpPost("{id}")]
-        public Task<Guid?> Post(Guid id, [FromBody] Eligibility eligibility)
+        public Task<Guid?> Post([FromRoute]Guid id, [FromBody]Eligibility eligibility)
         {
-            return CommandHub.Dispatch<InsertEligibilityCommand, Guid?>(new InsertEligibilityCommand(this.Id, id, eligibility));
+            return commandHub.Dispatch<InsertEligibilityCommand, 
+                Guid?>(new InsertEligibilityCommand(id, eligibility));
         }
 
         [HttpPut("{id}")]
-        public Task<bool> Put(Guid id, [FromBody] Eligibility eligibility)
+        public Task<bool> Put([FromRoute] Guid id, [FromBody] Eligibility eligibility)
         {
-            return CommandHub.Dispatch<UpdateEligibilityCommand, bool>(new UpdateEligibilityCommand(this.Id, eligibility));
+            return commandHub.Dispatch<UpdateEligibilityCommand, bool>(new UpdateEligibilityCommand(id, eligibility));
         }
 
         [HttpDelete("{id}")]
-        public Task<bool> Delete(Guid id, [FromBody] Eligibility eligibility)
+        public Task<bool> Delete([FromRoute] Guid id, [FromBody] Eligibility eligibility)
         {
-            return CommandHub.Dispatch<DeleteEligibilityCommand, bool>(new DeleteEligibilityCommand(this.Id, eligibility));
+            return commandHub.Dispatch<DeleteEligibilityCommand, bool>(new DeleteEligibilityCommand(id, eligibility));
         }
 
         public EligibilitiesController(ICommandHub commandHub, IQueryHub queryHub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
+            // query validators
 
-            // register query handlers
-            QueryHub.RegisterHandler<AttributesQueriesHandler, EligibilitiesQuery, EligibilitiesQueryResult>();
 
-            // register command handlers
-            CommandHub.RegisterHandler<AttributesCommandsHandler, InsertEligibilityCommand, Guid?>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, UpdateEligibilityCommand, bool>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, DeleteEligibilityCommand, bool>();
+            // contributors
+
+
+            // command validators
+
+
+            // command handler
+
+
+            this.queryHub = queryHub;
+            this.commandHub = commandHub;
         }
 
-        private readonly Guid Id = Guid.NewGuid();
-        private readonly ICommandHub CommandHub;
-        private readonly IQueryHub QueryHub;
+        private readonly IQueryHub queryHub;
+        private readonly ICommandHub commandHub;
     }
 }

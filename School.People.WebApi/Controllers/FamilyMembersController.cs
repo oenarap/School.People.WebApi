@@ -3,36 +3,41 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using School.People.App.Queries;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.Queries.Handlers;
-using School.People.Core.Attributes.Aggregates;
+using School.People.Core.Attributes;
 using Microsoft.AspNetCore.Authorization;
-using School.People.App.Queries.Results.Handlers;
+using School.People.Core.DTOs.Aggregates;
+using School.People.App.Queries.Results;
+using School.People.App.Queries.Models;
+using School.People.App.Queries.Validators;
+using School.People.App.Queries.Contributors;
 
 namespace School.People.WebApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class FamilyMembersController : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IFamilyMembersAggregate> Get(Guid id)
+        public async Task<FamilyMembersQueryData> Get([FromRoute]Guid id, [FromQuery]Guid personId)
         {
-            var result = await QueryHub.Dispatch<FamilyMembersAggregateQuery,
-                FamilyMembersAggregateQueryResult>(new FamilyMembersAggregateQuery(this.Id, id)).ConfigureAwait(false);
+            var result = await hub.Dispatch<FamilyMembersQuery,
+                FamilyMembersQueryResult>(new FamilyMembersQuery(id, personId)).ConfigureAwait(false);
             return result?.Data;
         }
 
-        public FamilyMembersController(IQueryHub queryHub)
+        public FamilyMembersController(IQueryHub hub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            QueryHub.RegisterHandler<AggregateQueriesHandler, FamilyMembersAggregateQuery, FamilyMembersAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<FamilyMembersContributor, FamilyMembersAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<ChildrenContributor, FamilyMembersAggregateQueryResult>();
+            // validator
+            hub.RegisterValidator<AggregateQueriesValidator, FamilyMembersQuery, FamilyMembersQueryResult>();
+
+            // contributors
+            hub.RegisterContributor<FamilyMembersContributor, FamilyMembersQueryResult>();
+            hub.RegisterContributor<ChildrenContributor, FamilyMembersQueryResult>();
+
+            this.hub = hub;
         }
 
-        private readonly Guid Id = Guid.NewGuid();
-        private readonly IQueryHub QueryHub;
+        private readonly IQueryHub hub;
     }
 }

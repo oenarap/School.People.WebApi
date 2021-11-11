@@ -11,22 +11,16 @@ namespace School.People.WebApi
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
-
-        public IConfiguration Configuration { get; }
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>();
+                .AddEntityFrameworkStores<ApiUsersDbContext>();
             services.AddControllers();
-            services.AddAppDbContext(Configuration);
-            services.AddJwtAuthentication(Configuration);
-            services.RegisterDbEntities(Configuration);
+            services.AddApiDbContexts(config);
+            services.AddJwtAuthentication(config);
+            services.AddRepositories(config);
+            services.AddMessagingEntities();
             services.AddServiceEntities();
         }
 
@@ -42,5 +36,12 @@ namespace School.People.WebApi
 
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
+
+        public Startup(IConfiguration configuration)
+        {
+            config = configuration;
+        }
+
+        private readonly IConfiguration config;
     }
 }

@@ -7,10 +7,12 @@ using School.People.App.Queries;
 using School.People.App.Commands;
 using System.Collections.Generic;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
 using School.People.App.Commands.Handlers;
+using School.People.App.Queries.Contributors;
+using School.People.App.Queries.Results;
+using School.People.App.Queries.Validators;
+using School.People.App.Commands.Validators;
 
 namespace School.People.WebApi.Controllers
 {
@@ -20,50 +22,57 @@ namespace School.People.WebApi.Controllers
     public class PersonnelController : ControllerBase
     {
         [HttpGet]
-        public async Task<IEnumerable<IPerson>> Get()
+        public async Task<IEnumerable<IPerson>> Get([FromRoute]Guid id)
         {
-            AllPersonnelQueryResult result = await QueryHub.Dispatch<AllPersonnelQuery, AllPersonnelQueryResult>(new AllPersonnelQuery(this.Id)).ConfigureAwait(false);
-            return result?.Data;
+           var result = await queryHub.Dispatch<AllPersonnelQuery, 
+               AllPersonnelQueryResult>(new AllPersonnelQuery(id)).ConfigureAwait(false);
+            return result?.Data.ToPersonArray();
         }
 
         [HttpGet("{id}")]
-        public async Task<IPerson> Get(Guid id)
+        public async Task<IPerson> Get([FromRoute]Guid id, [FromQuery]Guid personnelId)
         {
-            PersonnelQueryResult result = await QueryHub.Dispatch<PersonnelQuery, PersonnelQueryResult>(new PersonnelQuery(this.Id, id)).ConfigureAwait(false);
+            var result = await queryHub.Dispatch<PersonnelQuery, 
+                PersonnelQueryResult>(new PersonnelQuery(id, personnelId)).ConfigureAwait(false);
             return result?.Data;
         }
 
         [Authorize(Roles = "Admin, HRMO")]
         [HttpPost]
-        public Task<Guid?> Post([FromBody] Person person)
+        public Task<Guid?> Post([FromRoute]Guid id, [FromBody] Person person)
         {
-            return CommandHub.Dispatch<InsertPersonnelCommand, Guid?>(new InsertPersonnelCommand(this.Id, person));
+            return commandHub.Dispatch<InsertPersonnelCommand, Guid?>(new InsertPersonnelCommand(id, person));
         }
 
         [Authorize(Roles = "Admin, HRMO")]
         [HttpDelete("{id}")]
-        public Task<bool> Delete(Guid id, [FromBody] Person person)
+        public Task<bool> Delete([FromRoute]Guid id, [FromBody] Person person)
         {
-            return CommandHub.Dispatch<ArchivePersonnelCommand, bool>(new ArchivePersonnelCommand(this.Id, person));
+            return commandHub.Dispatch<ArchivePersonnelCommand, bool>(new ArchivePersonnelCommand(id, person));
         }
 
         public PersonnelController(ICommandHub commandHub, IQueryHub queryHub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
+            // query validators
+            queryHub.RegisterValidator<PeopleQueriesValidator, AllPersonnelQuery, AllPersonnelQueryResult>();
+            queryHub.RegisterValidator<PersonQueriesValidator, PersonnelQuery, PersonnelQueryResult>();
 
-            // register query handlers
-            QueryHub.RegisterHandler<PeopleQueriesHandler, AllPersonnelQuery, AllPersonnelQueryResult>();
-            QueryHub.RegisterHandler<PeopleQueriesHandler, PersonnelQuery, PersonnelQueryResult>();
+            // contributors
+            queryHub.RegisterContributor<PeopleContributor, AllPersonnelQueryResult>();
+            queryHub.RegisterContributor<PersonContributor, PersonnelQueryResult>();
 
-            // register command handlers
-            CommandHub.RegisterPreHandler<PersonValidator, InsertPersonnelCommand>();
-            CommandHub.RegisterHandler<PeopleCommandsHandler, InsertPersonnelCommand, Guid?>();
-            CommandHub.RegisterHandler<PeopleCommandsHandler, ArchivePersonnelCommand, bool>();
+            // command validators
+            commandHub.RegisterValidator<InsertPersonnelCommand, PersonValidator>();
+
+            // command handler
+            commandHub.RegisterHandler<InsertPersonnelCommand, PersonCommandsHandler, Guid?>();
+            commandHub.RegisterHandler<ArchivePersonnelCommand, PersonCommandsHandler, bool>();
+
+            this.queryHub = queryHub;
+            this.commandHub = commandHub;
         }
 
-        private readonly IQueryHub QueryHub;
-        private readonly ICommandHub CommandHub;
-        private readonly Guid Id = Guid.NewGuid();
+        private readonly IQueryHub queryHub;
+        private readonly ICommandHub commandHub;
     }
 }

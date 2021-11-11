@@ -133,7 +133,7 @@ namespace School.People.WebApi.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public UserService(ApplicationDbContext context, UserManager<IdentityUser> userManager, 
+        public UserService(ApiUsersDbContext context, UserManager<IdentityUser> userManager, 
             IPasswordHasher<IdentityUser> hasher, IConfiguration configuration)
         {
             this.context = context;
@@ -143,7 +143,7 @@ namespace School.People.WebApi.Services
         }
 
         private readonly IConfiguration config;
-        private readonly ApplicationDbContext context;
+        private readonly ApiUsersDbContext context;
         private readonly IPasswordHasher<IdentityUser> hasher;
         private readonly UserManager<IdentityUser> manager;
     }

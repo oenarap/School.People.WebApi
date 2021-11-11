@@ -15,17 +15,23 @@ namespace School.People.WebApi.Controllers
     public class AgencyMemberDetailsController : ControllerBase
     {
         [HttpPut("{id}")]
-        public Task<bool> Put(Guid id, [FromBody] AgencyMemberDetails value)
+        public Task<bool> Put([FromRoute]Guid id, [FromBody] AgencyMemberDetails details)
         {
-            return CommandHub.Dispatch<UpdateAgencyMemberDetailsCommand, bool>(new UpdateAgencyMemberDetailsCommand(id, value));
+            return commandHub.Dispatch<UpdateAgencyMemberDetailsCommand, 
+                bool>(new UpdateAgencyMemberDetailsCommand(id, details));
         }
 
         public AgencyMemberDetailsController(ICommandHub commandHub)
         {
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
-            CommandHub.RegisterHandler<DistinctAttributesCommandsHandler, UpdateAgencyMemberDetailsCommand, bool>();
+            // command validators
+
+
+            // command handler
+
+
+            this.commandHub = commandHub;
         }
 
-        private readonly ICommandHub CommandHub;
+        private readonly ICommandHub commandHub;
     }
 }

@@ -3,11 +3,9 @@ using School.People.Core;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using School.People.App.Queries;
-using System.Collections.Generic;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
+using School.People.App.Queries.Results;
 
 namespace School.People.WebApi.Controllers
 {
@@ -16,20 +14,19 @@ namespace School.People.WebApi.Controllers
     [ApiController]
     public class ArchivedController : ControllerBase
     {
-        [HttpGet]
-        public async Task<IEnumerable<IPerson>> Get()
+        [HttpGet("{id}")]
+        public async Task<IPerson[]> Get([FromRoute] Guid id)
         {
-            ArchivedPeopleQueryResult result = await QueryHub.Dispatch<ArchivedPeopleQuery, ArchivedPeopleQueryResult>(new ArchivedPeopleQuery(this.Id)).ConfigureAwait(false);
-            return result?.Data;
+            var result = await hub.Dispatch<ArchivedPeopleQuery, 
+                ArchivedPeopleQueryResult>(new ArchivedPeopleQuery(id)).ConfigureAwait(false);
+            return result?.Data.ToPersonArray();
         }
 
-        public ArchivedController(IQueryHub queryHub)
+        public ArchivedController(IQueryHub hub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            QueryHub.RegisterHandler<PeopleQueriesHandler, ArchivedPeopleQuery, ArchivedPeopleQueryResult>();
+            this.hub = hub;
         }
 
-        private readonly IQueryHub QueryHub;
-        private readonly Guid Id = Guid.NewGuid();
+        private readonly IQueryHub hub;
     }
 }

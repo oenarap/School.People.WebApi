@@ -7,13 +7,13 @@ using Apps.Communication.Core;
 using Microsoft.EntityFrameworkCore;
 using School.People.Data.Repositories;
 using Microsoft.IdentityModel.Tokens;
-using School.People.App.QueryHandlers;
-using School.People.App.Queries.Handlers;
 using Microsoft.Extensions.Configuration;
-using School.People.App.Commands.Handlers;
 using Microsoft.Extensions.DependencyInjection;
-using School.People.App.Queries.Results.Handlers;
 using School.People.WebApi.Services;
+using School.People.App.Commands.Validators;
+using School.People.App.Commands.Handlers;
+using School.People.App.Queries.Validators;
+using School.People.App.Queries.Contributors;
 
 namespace School.People.WebApi
 {
@@ -47,75 +47,88 @@ namespace School.People.WebApi
             return services;
         }
 
-        public static IServiceCollection AddAppDbContext(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddApiDbContexts(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDbContext<ApplicationDbContext>(options =>
+            var builder = new DbContextOptionsBuilder<PeopleDbContext>()
+                .UseSqlServer(configuration.GetConnectionString("PeopleDbConnectionString"));
+            
+            services.AddSingleton(builder.Options);
+            services.AddTransient<PeopleDbContext>();
+            services.AddDbContext<ApiUsersDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            
             return services;
         }
 
-        public static IServiceCollection RegisterDbEntities(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddMessagingEntities(this IServiceCollection services)
         {
-            // database context options
-            DbContextOptionsBuilder builder = new DbContextOptionsBuilder();
-            builder.UseSqlServer(configuration.GetConnectionString("PeopleDbConnectionString"));
-            services.AddSingleton(builder.Options);
-
-            // database contexts
-            services.AddSingleton<PeopleDbContext>();
-
             // hubs
             services.AddSingleton<IQueryHub, QueryHub>();
             services.AddSingleton<ICommandHub, CommandHub>();
             services.AddSingleton<IEventHub, EventHub>();
 
-            // repositories
-            services.AddSingleton<IActivePeopleRepository, ActivePeopleRepository>();
-            services.AddSingleton<IStudentsRepository, StudentsRepository>();
-            services.AddSingleton<IPersonnelRepository, PersonnelsRepository>();
-            services.AddSingleton<IOtherPeopleRepository, OtherPeopleRepository>();
-            services.AddSingleton<IArchivedPeopleRepository, ArchivedPeopleRepository>();
-            services.AddSingleton<IEducationsRepository, EducationsRepository>();
-            services.AddSingleton<IEligibilitiesRepository, EligibilitiesRepository>();
-            services.AddSingleton<IWorksRepository, WorksRepository>();
-            services.AddSingleton<ICivicWorksRepository, CivicWorksRepository>();
-            services.AddSingleton<ITrainingsRepository, TrainingsRepository>();
-            services.AddSingleton<IOtherInformationsRepository, OtherInformationsRepository>();
-            services.AddSingleton<IFaqsRepository, FaqsRepository>();
-            services.AddSingleton<IVerificationDetailsRepository, VerificationDetailsRepository>();
-            services.AddSingleton<IFamilyIdsRepository, FamilyIdsRepository>();
-            services.AddSingleton<IAddressIdsRepository, AddressIdsRepository>();
-            services.AddSingleton<IImagesRepository, ImagesRepository>();
-            services.AddSingleton<IPersonDetailsRepository, PersonDetailsRepository>();
-            services.AddSingleton<IDateOfBirthsRepository, DateOfBirthsRepository>();
-            services.AddSingleton<ICitizenshipsRepository, CitizenshipsRepository>();
-            services.AddSingleton<IContactDetailsRepository, ContactDetailsRepository>();
-            services.AddSingleton<IAgencyMemberDetailsRepository, AgencyMemberDetailsRepository>();
-            services.AddSingleton<IPersonRepository, PersonRepository>();
-            services.AddSingleton<IMotherIdsRepository, MotherIdsRepository>();
-            services.AddSingleton<IFatherIdsRepository, FatherIdsRepository>();
-            services.AddSingleton<ISpouseIdsRepository, SpouseIdsRepository>();
-
-            // command pre-handlers
-            services.AddSingleton<PersonValidator>();
+            // command validators
+            services.AddTransient<PersonValidator>();
+            services.AddTransient<PersonCommandsValidator>();
+            services.AddTransient<AttributeCommandsValidator>();
+            services.AddTransient<BirthdateValidator>();
+            services.AddTransient<EducationValidator>();
 
             // command handlers
-            services.AddSingleton<DistinctAttributesCommandsHandler>();
-            services.AddSingleton<PeopleCommandsHandler>();
-            services.AddSingleton<AttributesCommandsHandler>();
+            services.AddTransient<DistinctAttributesCommandsHandler>();
+            services.AddTransient<AttributeCommandsHandler>();
+            services.AddTransient<PersonCommandsHandler>();
 
-            // query handlers
-            services.AddSingleton<AggregateQueriesHandler>();
-            services.AddSingleton<PeopleQueriesHandler>();
-            services.AddSingleton<AttributesQueriesHandler>();
+            // query validators 
+            services.AddTransient<AggregateQueriesValidator>();
+            services.AddTransient<AttributesQueriesValidator>();
+            services.AddTransient<PeopleQueriesValidator>();
+            services.AddTransient<PersonQueriesValidator>();
 
-            // query post-handlers
-            services.AddSingleton<PersonDetailsContributor>();
-            services.AddSingleton<DateOfBirthContributor>();
-            services.AddSingleton<CitizenshipContributor>();
-            services.AddSingleton<ContactDetailsContributor>();
-            services.AddSingleton<AgencyMemberDetailsContributor>();
+            // query contributors
+            services.AddTransient<AgencyMemberDetailsContributor>();
+            services.AddTransient<BirthAddressContributor>();
+            services.AddTransient<BirthdateContributor>();
+            services.AddTransient<ChildrenContributor>();
+            services.AddTransient<CitizenshipContributor>();
+            services.AddTransient<ContactDetailsContributor>();
+            services.AddTransient<FamilyMembersContributor>();
+            services.AddTransient<PeopleContributor>();
+            services.AddTransient<PermanentAddressContributor>();
+            services.AddTransient<PersonContributor>();
+            services.AddTransient<PersonDetailsContributor>();
+            services.AddTransient<ResidentialAddressContributor>();
 
+            return services;
+        }
+
+        public static IServiceCollection AddRepositories(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddTransient<IActivePeopleRepository, ActivePeopleRepository>();
+            services.AddTransient<IStudentsRepository, StudentsRepository>();
+            services.AddTransient<IPersonnelRepository, PersonnelsRepository>();
+            services.AddTransient<IOtherPeopleRepository, OtherPeopleRepository>();
+            services.AddTransient<IArchivedPeopleRepository, ArchivedPeopleRepository>();
+            services.AddTransient<IEducationsRepository, EducationsRepository>();
+            services.AddTransient<IEligibilitiesRepository, EligibilitiesRepository>();
+            services.AddTransient<IWorksRepository, WorksRepository>();
+            services.AddTransient<ICivicWorksRepository, CivicWorksRepository>();
+            services.AddTransient<ITrainingsRepository, TrainingsRepository>();
+            services.AddTransient<IOtherInformationsRepository, OtherInformationsRepository>();
+            services.AddTransient<IFaqsRepository, FaqsRepository>();
+            services.AddTransient<IVerificationDetailsRepository, VerificationDetailsRepository>();
+            services.AddTransient<IFamilyIdsRepository, FamilyIdsRepository>();
+            services.AddTransient<IAddressIdsRepository, AddressIdsRepository>();
+            services.AddTransient<IImagesRepository, ImagesRepository>();
+            services.AddTransient<IPersonDetailsRepository, PersonDetailsRepository>();
+            services.AddTransient<IDateOfBirthsRepository, DateOfBirthsRepository>();
+            services.AddTransient<ICitizenshipsRepository, CitizenshipsRepository>();
+            services.AddTransient<IContactDetailsRepository, ContactDetailsRepository>();
+            services.AddTransient<IAgencyMemberDetailsRepository, AgencyMemberDetailsRepository>();
+            services.AddTransient<IPersonRepository, PersonRepository>();
+            services.AddTransient<IMotherIdsRepository, MotherIdsRepository>();
+            services.AddTransient<IFatherIdsRepository, FatherIdsRepository>();
+            services.AddTransient<ISpouseIdsRepository, SpouseIdsRepository>();
             return services;
         }
     }

@@ -15,19 +15,25 @@ namespace School.People.WebApi.Controllers
     public class SpouseController : ControllerBase
     {
         [HttpPut("{id}")]
-        public async Task<bool> Put(Guid id, [FromBody] Person value)
+        public async Task<bool> Put([FromRoute]Guid id, Guid personId, [FromBody] Person value)
         {
-            bool result = await CommandHub.Dispatch<UpdateSpouseCommand, bool>(new UpdateSpouseCommand(id, value)).ConfigureAwait(false);
+            bool result = await commandHub.Dispatch<UpdateSpouseCommand, 
+                bool>(new UpdateSpouseCommand(id, value, personId)).ConfigureAwait(false);
             return result;
         }
 
         public SpouseController(ICommandHub commandHub)
         {
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
-            CommandHub.RegisterHandler<PeopleCommandsHandler, UpdateSpouseCommand, bool>();
+            // command validators
+
+
+            // command handler
+
+
+            this.commandHub = commandHub;
         }
 
-        private readonly ICommandHub CommandHub;
+        private readonly ICommandHub commandHub;
     }
 }
 

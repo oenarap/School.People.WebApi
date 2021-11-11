@@ -15,17 +15,22 @@ namespace School.People.WebApi.Controllers
     public class FatherController : ControllerBase
     {
         [HttpPut("{id}")]
-        public Task<bool> Put(Guid id, [FromBody] Person value)
+        public Task<bool> Put([FromRoute]Guid id, Guid personId, [FromBody] Person value)
         {
-            return CommandHub.Dispatch<UpdateFatherCommand, bool>(new UpdateFatherCommand(id, value));
+            return commandHub.Dispatch<UpdateFatherCommand, bool>(new UpdateFatherCommand(id, value, personId));
         }
 
         public FatherController(ICommandHub commandHub)
         {
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
-            CommandHub.RegisterHandler<PeopleCommandsHandler, UpdateFatherCommand, bool>();
+            // command validators
+
+
+            // command handler
+
+
+            this.commandHub = commandHub;
         }
 
-        private readonly ICommandHub CommandHub;
+        private readonly ICommandHub commandHub;
     }
 }

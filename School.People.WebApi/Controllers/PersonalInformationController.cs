@@ -1,41 +1,44 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using School.People.App.Queries;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.Queries.Handlers;
-using School.People.Core.Attributes.Aggregates;
 using Microsoft.AspNetCore.Authorization;
-using School.People.App.Queries.Results.Handlers;
+using School.People.App.Queries;
+using School.People.App.Queries.Results;
+using School.People.App.Queries.Models;
+using School.People.App.Queries.Contributors;
+using School.People.App.Queries.Validators;
+using School.People.Core.DTOs.Aggregates;
 
 namespace School.People.WebApi.Controllers
 {
-    //[Authorize]
+    [Authorize(Roles = "Registrar, ProgCoordinator, DeptHead, EnrollingTeacher")]
     [Route("api/[controller]")]
-    [ApiController]
     public class PersonalInformationController : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IPersonalInformationAggregate> Get(Guid id)
+        public async Task<PersonalInformationQueryData> Get([FromRoute]Guid id, [FromQuery]Guid personId)
         {
-            var result = await QueryHub.Dispatch<PersonalInformationAggregateQuery, 
-                PersonalInformationAggregateQueryResult>(new PersonalInformationAggregateQuery(this.Id, id)).ConfigureAwait(false);
+            var result = await hub.Dispatch<PersonalInformationQuery,
+                PersonalInformationQueryResult>(new PersonalInformationQuery(id, personId)).ConfigureAwait(false);
             return result?.Data;
         }
 
-        public PersonalInformationController(IQueryHub queryHub)
+        public PersonalInformationController(IQueryHub hub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            QueryHub.RegisterHandler<AggregateQueriesHandler, PersonalInformationAggregateQuery, PersonalInformationAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<PersonDetailsContributor, PersonalInformationAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<DateOfBirthContributor, PersonalInformationAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<CitizenshipContributor, PersonalInformationAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<ContactDetailsContributor, PersonalInformationAggregateQueryResult>();
-            QueryHub.RegisterPostHandler<AgencyMemberDetailsContributor, PersonalInformationAggregateQueryResult>();
+            this.hub = hub;
+
+            // validator
+            hub.RegisterValidator<AggregateQueriesValidator, PersonalInformationQuery, PersonalInformationQueryResult>();
+            
+            // contributors
+            hub.RegisterContributor<BirthdateContributor, PersonalInformationQueryResult>();
+            hub.RegisterContributor<PersonDetailsContributor, PersonalInformationQueryResult>();
+            hub.RegisterContributor<AgencyMemberDetailsContributor, PersonalInformationQueryResult>();
+            hub.RegisterContributor<CitizenshipContributor, PersonalInformationQueryResult>();
+            hub.RegisterContributor<ContactDetailsContributor, PersonalInformationQueryResult>();
         }
 
-        private readonly Guid Id = Guid.NewGuid();
-        private readonly IQueryHub QueryHub;
+        private readonly IQueryHub hub;
     }
 }

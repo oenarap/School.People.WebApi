@@ -9,23 +9,28 @@ using School.People.App.Commands.Handlers;
 
 namespace School.People.WebApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PersonDetailsController : ControllerBase
     {
         [HttpPut("{id}")]
-        public Task<bool> Put(Guid id, [FromBody] PersonDetails value)
+        public Task<bool> Put([FromRoute]Guid id, [FromBody] PersonDetails details)
         {
-            return CommandHub.Dispatch<UpdatePersonDetailsCommand, bool>(new UpdatePersonDetailsCommand(id, value));
+            return commandHub.Dispatch<UpdatePersonDetailsCommand, bool>(new UpdatePersonDetailsCommand(id, details));
         }
 
         public PersonDetailsController(ICommandHub commandHub)
         {
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
-            CommandHub.RegisterHandler<DistinctAttributesCommandsHandler, UpdatePersonDetailsCommand, bool>();
+            // command validators
+
+
+            // command handler
+
+
+            this.commandHub = commandHub;
         }
 
-        private readonly ICommandHub CommandHub;
+        private readonly ICommandHub commandHub;
     }
 }

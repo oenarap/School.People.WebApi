@@ -9,7 +9,7 @@ using School.People.App.Commands.Handlers;
 
 namespace School.People.WebApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DateOfBirthController : ControllerBase
@@ -17,15 +17,20 @@ namespace School.People.WebApi.Controllers
         [HttpPut("{id}")]
         public Task<bool> Put(Guid id, [FromBody] DateOfBirth value)
         {
-            return CommandHub.Dispatch<UpdateDateOfBirthCommand, bool>(new UpdateDateOfBirthCommand(id, value));
+            return commandHub.Dispatch<UpdateDateOfBirthCommand, bool>(new UpdateDateOfBirthCommand(id, value));
         }
 
         public DateOfBirthController(ICommandHub commandHub)
         {
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
-            CommandHub.RegisterHandler<DistinctAttributesCommandsHandler, UpdateDateOfBirthCommand, bool>();
+            // command validators
+
+
+            // command handler
+
+
+            this.commandHub = commandHub;
         }
 
-        private readonly ICommandHub CommandHub;
+        private readonly ICommandHub commandHub;
     }
 }

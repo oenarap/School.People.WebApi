@@ -7,10 +7,12 @@ using School.People.App.Queries;
 using System.Collections.Generic;
 using School.People.App.Commands;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
 using School.People.App.Commands.Handlers;
+using School.People.App.Commands.Validators;
+using School.People.App.Queries.Contributors;
+using School.People.App.Queries.Results;
+using School.People.App.Queries.Validators;
 
 namespace School.People.WebApi.Controllers
 {
@@ -19,51 +21,53 @@ namespace School.People.WebApi.Controllers
     public class EducationsController : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IEnumerable<IEducation>> Get(Guid id)
+        public async Task<IEnumerable<IEducation>> Get([FromRoute]Guid id, [FromQuery]Guid personId)
         {
-            var result = await QueryHub.Dispatch<EducationsQuery, EducationsQueryResult>(new EducationsQuery(this.Id, id)).ConfigureAwait(false);
+            var result = await queryHub.Dispatch<EducationsQuery, 
+                EducationsQueryResult>(new EducationsQuery(id, personId)).ConfigureAwait(false);
             return result?.Data;
         }
 
         [Authorize]
         [HttpPost("{id}")]
-        public Task<Guid?> Post(Guid id, [FromBody] Education education)
+        public Task<Guid?> Post([FromRoute]Guid id, [FromBody] Education education)
         {
-            return CommandHub.Dispatch<InsertEducationCommand, Guid?>(new InsertEducationCommand(this.Id, id, education));
+            return commandHub.Dispatch<InsertEducationCommand, Guid?>(new InsertEducationCommand(id, education, id));
         }
 
         [Authorize]
         [HttpPut("{id}")]
         public Task<bool> Put(Guid id, [FromBody] Education education)
         {
-            return CommandHub.Dispatch<UpdateEducationCommand, bool>(new UpdateEducationCommand(this.Id, education));
+            return commandHub.Dispatch<UpdateEducationCommand, bool>(new UpdateEducationCommand(id, education));
         }
 
         [Authorize]
         [HttpDelete("{id}")]
         public Task<bool> Delete(Guid id, [FromBody] Education education)
         {
-            return CommandHub.Dispatch<DeleteEducationCommand, bool>(new DeleteEducationCommand(this.Id, education));
+            return commandHub.Dispatch<DeleteEducationCommand, bool>(new DeleteEducationCommand(id, education));
         }
 
         public EducationsController(ICommandHub commandHub, IQueryHub queryHub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
+            // query validators
 
-            // register query handlers
-            QueryHub.RegisterHandler<AttributesQueriesHandler, EducationsQuery, EducationsQueryResult>();
 
-            // register command handlers
-            //CommandHub.RegisterPreHandler<EducationValidator, UpdateEducationCommand>();
-            //CommandHub.RegisterPreHandler<EducationValidator, InsertEducationCommand>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, InsertEducationCommand, Guid?>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, UpdateEducationCommand, bool>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, DeleteEducationCommand, bool>();
+            // contributors
+
+
+            // command validators
+
+
+            // command handler
+
+
+            this.queryHub = queryHub;
+            this.commandHub = commandHub;
         }
-        
-        private readonly Guid Id = Guid.NewGuid();
-        private readonly ICommandHub CommandHub;
-        private readonly IQueryHub QueryHub;
+
+        private readonly IQueryHub queryHub;
+        private readonly ICommandHub commandHub;
     }
 }

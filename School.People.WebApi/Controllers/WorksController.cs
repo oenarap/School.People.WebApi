@@ -7,10 +7,9 @@ using School.People.App.Queries;
 using System.Collections.Generic;
 using School.People.App.Commands;
 using Apps.Communication.Core;
-using School.People.App.QueryResults;
-using School.People.App.QueryHandlers;
 using Microsoft.AspNetCore.Authorization;
 using School.People.App.Commands.Handlers;
+using School.People.App.Queries.Results;
 
 namespace School.People.WebApi.Controllers
 {
@@ -19,49 +18,53 @@ namespace School.People.WebApi.Controllers
     public class WorksController : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IEnumerable<IWork>> Get(Guid id)
+        public async Task<IEnumerable<IWork>> Get([FromRoute] Guid id, Guid personId)
         {
-            var result = await QueryHub.Dispatch<WorksQuery, WorksQueryResult>(new WorksQuery(this.Id, id)).ConfigureAwait(false);
+            var result = await queryHub.Dispatch<WorksQuery, 
+                WorksQueryResult>(new WorksQuery(id, personId)).ConfigureAwait(false);
             return result?.Data;
         }
 
         [Authorize]
         [HttpPost("{id}")]
-        public Task<Guid?> Post(Guid id, [FromBody] Work work)
+        public Task<Guid?> Post([FromRoute]Guid id, [FromBody] Work work)
         {
-            return CommandHub.Dispatch<InsertWorkCommand, Guid?>(new InsertWorkCommand(this.Id, id, work));
+            return commandHub.Dispatch<InsertWorkCommand, Guid?>(new InsertWorkCommand(id, work, id));
         }
 
         [Authorize]
         [HttpPut("{id}")]
-        public Task<bool> Put(Guid id, [FromBody] Work work)
+        public Task<bool> Put([FromRoute] Guid id, [FromBody] Work work)
         {
-            return CommandHub.Dispatch<UpdateWorkCommand, bool>(new UpdateWorkCommand(this.Id, work));
+            return commandHub.Dispatch<UpdateWorkCommand, bool>(new UpdateWorkCommand(id, work));
         }
 
         [Authorize]
         [HttpDelete("{id}")]
         public Task<bool> Delete(Guid id, [FromBody] Work work)
         {
-            return CommandHub.Dispatch<DeleteWorkCommand, bool>(new DeleteWorkCommand(this.Id, work));
+            return commandHub.Dispatch<DeleteWorkCommand, bool>(new DeleteWorkCommand(id, work));
         }
 
         public WorksController(ICommandHub commandHub, IQueryHub queryHub)
         {
-            QueryHub = queryHub ?? throw new ArgumentNullException(nameof(queryHub));
-            CommandHub = commandHub ?? throw new ArgumentNullException(nameof(commandHub));
+            // query validators
 
-            // register query handlers
-            QueryHub.RegisterHandler<AttributesQueriesHandler, WorksQuery, WorksQueryResult>();
 
-            // register command handlers
-            CommandHub.RegisterHandler<AttributesCommandsHandler, InsertWorkCommand, Guid?>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, UpdateWorkCommand, bool>();
-            CommandHub.RegisterHandler<AttributesCommandsHandler, DeleteWorkCommand, bool>();
+            // contributors
+
+
+            // command validators
+
+
+            // command handler
+
+
+            this.queryHub = queryHub;
+            this.commandHub = commandHub;
         }
 
-        private readonly Guid Id = Guid.NewGuid();
-        private readonly ICommandHub CommandHub;
-        private readonly IQueryHub QueryHub;
+        private readonly IQueryHub queryHub;
+        private readonly ICommandHub commandHub;
     }
 }
