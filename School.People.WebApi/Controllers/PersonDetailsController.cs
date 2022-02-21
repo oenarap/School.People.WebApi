@@ -1,11 +1,10 @@
 ﻿using System;
-using School.People.Core.DTOs;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using School.People.App.Commands;
 using Apps.Communication.Core;
 using Microsoft.AspNetCore.Authorization;
-using School.People.App.Commands.Handlers;
+using School.People.WebApi.Models;
 
 namespace School.People.WebApi.Controllers
 {
@@ -17,7 +16,8 @@ namespace School.People.WebApi.Controllers
         [HttpPut("{id}")]
         public Task<bool> Put([FromRoute]Guid id, [FromBody] PersonDetails details)
         {
-            return commandHub.Dispatch<UpdatePersonDetailsCommand, bool>(new UpdatePersonDetailsCommand(id, details));
+            return commandHub.Dispatch<UpdatePersonDetailsCommand, 
+                bool>(new UpdatePersonDetailsCommand(id, details));
         }
 
         public PersonDetailsController(ICommandHub commandHub)

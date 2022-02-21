@@ -5,9 +5,8 @@ using School.People.App.Queries;
 using Apps.Communication.Core;
 using School.People.Core.Attributes;
 using Microsoft.AspNetCore.Authorization;
-using School.People.Core.DTOs.Aggregates;
 using School.People.App.Queries.Results;
-using School.People.App.Queries.Models;
+using School.People.App.Queries.Data;
 using School.People.App.Queries.Validators;
 using School.People.App.Queries.Contributors;
 
@@ -32,7 +31,9 @@ namespace School.People.WebApi.Controllers
             hub.RegisterValidator<AggregateQueriesValidator, FamilyMembersQuery, FamilyMembersQueryResult>();
 
             // contributors
-            hub.RegisterContributor<FamilyMembersContributor, FamilyMembersQueryResult>();
+            hub.RegisterContributor<MotherContributor, FamilyMembersQueryResult>();
+            hub.RegisterContributor<FatherContributor, FamilyMembersQueryResult>();
+            hub.RegisterContributor<SpouseContributor, FamilyMembersQueryResult>();
             hub.RegisterContributor<ChildrenContributor, FamilyMembersQueryResult>();
 
             this.hub = hub;

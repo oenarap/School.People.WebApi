@@ -1,6 +1,5 @@
 ﻿using System;
 using School.People.Core;
-using School.People.Core.DTOs;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using School.People.App.Queries;
@@ -13,6 +12,7 @@ using School.People.App.Queries.Contributors;
 using School.People.App.Queries.Results;
 using School.People.App.Queries.Validators;
 using School.People.App.Commands.Validators;
+using School.People.WebApi.Models;
 
 namespace School.People.WebApi.Controllers
 {
@@ -26,7 +26,7 @@ namespace School.People.WebApi.Controllers
         {
            var result = await queryHub.Dispatch<AllPersonnelQuery, 
                AllPersonnelQueryResult>(new AllPersonnelQuery(id)).ConfigureAwait(false);
-            return result?.Data.ToPersonArray();
+            return result?.Data.People;
         }
 
         [HttpGet("{id}")]
@@ -34,7 +34,7 @@ namespace School.People.WebApi.Controllers
         {
             var result = await queryHub.Dispatch<PersonnelQuery, 
                 PersonnelQueryResult>(new PersonnelQuery(id, personnelId)).ConfigureAwait(false);
-            return result?.Data;
+            return result?.Data.Person;
         }
 
         [Authorize(Roles = "Admin, HRMO")]

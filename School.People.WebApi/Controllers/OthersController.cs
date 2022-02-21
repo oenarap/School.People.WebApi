@@ -22,7 +22,7 @@ namespace School.People.WebApi.Controllers
         {
             var result = await hub.Dispatch<OtherPeopleQuery, 
                 OtherPeopleQueryResult>(new OtherPeopleQuery(id)).ConfigureAwait(false);
-            return result?.Data.ToPersonArray();
+            return result?.Data.People;
         }
 
         public OthersController(IQueryHub hub)

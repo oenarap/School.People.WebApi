@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-
+using School.People.WebApi.Extensions;
 
 namespace School.People.WebApi
 {
@@ -33,7 +33,7 @@ namespace School.People.WebApi
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-
+            app.UseUserValidator();
             app.UseEndpoints(endpoints => endpoints.MapControllers());
         }
 

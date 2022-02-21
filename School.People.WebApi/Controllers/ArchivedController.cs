@@ -6,6 +6,7 @@ using School.People.App.Queries;
 using Apps.Communication.Core;
 using Microsoft.AspNetCore.Authorization;
 using School.People.App.Queries.Results;
+using System.Collections.Generic;
 
 namespace School.People.WebApi.Controllers
 {
@@ -15,11 +16,11 @@ namespace School.People.WebApi.Controllers
     public class ArchivedController : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<IPerson[]> Get([FromRoute] Guid id)
+        public async Task<IEnumerable<IPerson>> Get([FromRoute] Guid id)
         {
             var result = await hub.Dispatch<ArchivedPeopleQuery, 
                 ArchivedPeopleQueryResult>(new ArchivedPeopleQuery(id)).ConfigureAwait(false);
-            return result?.Data.ToPersonArray();
+            return result?.Data.People;
         }
 
         public ArchivedController(IQueryHub hub)

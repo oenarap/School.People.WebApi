@@ -1,5 +1,4 @@
 ﻿using System;
-using School.People.Core.DTOs;
 using System.Threading.Tasks;
 using School.People.Core.Attributes;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,7 @@ using School.People.App.Commands.Validators;
 using School.People.App.Queries.Contributors;
 using School.People.App.Queries.Results;
 using School.People.App.Queries.Validators;
+using School.People.WebApi.Models;
 
 namespace School.People.WebApi.Controllers
 {

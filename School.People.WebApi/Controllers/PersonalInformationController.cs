@@ -5,10 +5,9 @@ using Apps.Communication.Core;
 using Microsoft.AspNetCore.Authorization;
 using School.People.App.Queries;
 using School.People.App.Queries.Results;
-using School.People.App.Queries.Models;
+using School.People.App.Queries.Data;
 using School.People.App.Queries.Contributors;
 using School.People.App.Queries.Validators;
-using School.People.Core.DTOs.Aggregates;
 
 namespace School.People.WebApi.Controllers
 {

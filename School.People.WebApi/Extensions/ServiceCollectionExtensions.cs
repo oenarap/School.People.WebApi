@@ -89,10 +89,12 @@ namespace School.People.WebApi
             services.AddTransient<AgencyMemberDetailsContributor>();
             services.AddTransient<BirthAddressContributor>();
             services.AddTransient<BirthdateContributor>();
-            services.AddTransient<ChildrenContributor>();
             services.AddTransient<CitizenshipContributor>();
             services.AddTransient<ContactDetailsContributor>();
-            services.AddTransient<FamilyMembersContributor>();
+            services.AddTransient<MotherContributor>();
+            services.AddTransient<FatherContributor>();
+            services.AddTransient<SpouseContributor>();
+            services.AddTransient<ChildrenContributor>();
             services.AddTransient<PeopleContributor>();
             services.AddTransient<PermanentAddressContributor>();
             services.AddTransient<PersonContributor>();
